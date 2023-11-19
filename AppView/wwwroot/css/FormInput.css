@@ -1,0 +1,41 @@
+﻿.nav-item {
+    position: relative;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+    .nav-item::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        transform: scaleX(0);
+        height: 2px;
+        bottom: 0;
+        left: 0;
+        background-color: black;
+        transform-origin: bottom right;
+        transition: transform 0.25s ease-out;
+        margin-left: 10px;
+    }
+
+.btn-danger:hover {
+    background-color: rgb(146, 135, 135) !important;
+    border-color: rgb(133, 123, 123) !important
+}
+
+.nav-item:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+.btn {
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: #fff;
+    color: black;
+}
+
+    .btn:hover {
+        color: white;
+        background-color: black;
+    }

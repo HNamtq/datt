@@ -1,0 +1,404 @@
+﻿﻿
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+	var userName = HttpContextAccessor.HttpContext.Session.GetString("UserName");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"]</title>
+	<link rel="icon" type="image" href="~/image/logo1.png" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<link href="~/css/css.css" />
+	<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">
+	<link href="https://unpkg.com/tailwindcss@0.3.0/dist/tailwind.min.css" rel="stylesheet">
+	<link rel="stylesheet" href='https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css'>
+	<link rel="icon" href="img/mdb-favicon.ico" type="image/x-icon" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+	<style>
+		.badge:after {
+			content: attr(value);
+			font-size: 10px;
+			color: #fff;
+			background: black;
+			border-radius: 20%;
+			padding: 0 5px;
+			position: relative;
+			left: -23px;
+			top: 0px;
+			opacity: 0.9;
+		}
+		.paste-button {
+			position: relative;
+			display: block;
+		}
+		.button {
+			color: #212121;
+			font-weight:bold;
+			padding: 10px 15px;
+			border: 2px solid transparent;
+			border-radius: 15px;
+			cursor: pointer;
+		}
+		.dropdown-content {
+			display: none;
+			font-size: 13px;
+			position: absolute;
+			z-index: 1;
+			min-width: 200px;
+			background-color: #fff;
+			border-radius: 0px 15px 15px 15px;
+			box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+		}
+			.dropdown-content a {
+				padding: 8px 10px;
+				text-decoration: none;
+				display: block;
+				transition: 0.1s;
+				color:black;
+			}
+
+				.dropdown-content a:hover {
+					background-color: lightgray;
+					border-radius: 0px 15px 15px 15px;
+				}
+
+			.dropdown-content #top:hover {
+				border-radius: 0px 13px 0px 0px;
+			}
+
+			.dropdown-content #bottom:hover {
+				border-radius: 0px 0px 13px 13px;
+			}
+
+		.paste-button:hover button {
+			border-radius: 15px 15px 0px 0px;
+		}
+
+		.paste-button:hover .dropdown-content {
+			display: block;
+		}
+
+	</style>
+</head>
+<body>
+	<header>
+		@if (HttpContextAccessor.HttpContext.Session.GetString("UserId") != null || HttpContextAccessor.HttpContext.Session.GetString("EmployeeID") != null)
+		{
+			@if (HttpContextAccessor.HttpContext.Session.GetString("EmployeeID") != null)
+			{
+				<div class="container-fluid">
+				<nav style="background: white; height: 40px;" class="relative select-none bg-grey lg:flex lg:items-stretch w-full">
+					<div class="flex flex-no-shrink items-stretch h-12">
+						<img style="width: 25px; height: 35px; padding-top: 10px; margin-left: 30px;" src="~/image/bongchuyen1.png"
+						 alt="">
+						<a style="font-size: 11px; font-weight: bold;"
+					   class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">
+							Hi: @Html.Raw(userName?.Replace("\"", ""))
+						</a>
+					</div>
+					<div class="lg:flex lg:items-stretch lg:flex-no-shrink lg:flex-grow">
+						<div style="padding-right: 10px;" class="lg:flex lg:items-stretch lg:justify-end ml-auto">
+						<a style="font-size: 11px; font-weight: bold;" href="@Url.Action("index", "DashBoard")"
+						   class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">Quản trị</a>
+						</div>
+					</div>
+					<a style="font-size: 11px; font-weight: bold;" asp-controller="Employee" asp-action="LogOut"
+				    class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">Log Out
+					</a>
+				</nav>
+			</div>
+			}
+			else
+			{
+				<div class="container-fluid">
+					<nav style="background: white; height: 40px;" class="relative select-none bg-grey lg:flex lg:items-stretch w-full">
+						<div class="flex flex-no-shrink items-stretch h-12">
+							<img style="width: 25px; height: 35px; padding-top: 10px; margin-left: 30px;" src="~/image/bongchuyen1.png"
+						 alt="">
+							<a style="font-size: 11px; font-weight: bold;"
+					   class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">
+								Hi: @Html.Raw(userName?.Replace("\"", ""))
+							</a>
+						</div>
+						<div class="lg:flex lg:items-stretch lg:flex-no-shrink lg:flex-grow">
+							<div style="padding-right: 10px; display:none;" class="lg:flex lg:items-stretch lg:justify-end ml-auto">
+								<a style="font-size: 11px; font-weight: bold;" href="#gioithieu"
+						   class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">Introduce</a>
+							</div>
+						</div>
+						<a style="font-size: 11px; font-weight: bold;" asp-controller="Customer" asp-action="LogOut"
+				        class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">
+							Log Out
+						</a>
+					</nav>
+				</div>
+			}
+		}
+		else
+		{
+			<div class="container-fluid">
+				<nav style="background: white; height: 40px;" class="relative select-none bg-grey lg:flex lg:items-stretch w-full">
+					<div class="flex flex-no-shrink items-stretch h-12">
+						<img style="width: 25px; height: 35px; padding-top: 10px; margin-left: 30px;" src="~/image/bongchuyen1.png"
+						 alt="">
+					</div>
+					<div class="lg:flex lg:items-stretch lg:flex-no-shrink lg:flex-grow">
+						<div style="padding-right: 10px;" class="lg:flex lg:items-stretch lg:justify-end ml-auto">
+							<a style="font-size: 11px; font-weight: bold;" href="#gioithieu"
+						   class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">Introduce</a>
+							<a style="font-size: 11px; font-weight: bold;" asp-controller="Customer" asp-action="SignUp"
+						   class="flex-no-grow flex-no-shrink relative py-2 px-4 leading-normal text-dark no-underline flex items-center">
+								Join
+								Us
+							</a>
+							<div class="paste-button" style="font-size: 11px; font-weight: bold; margin-top: 0.8%;">
+								<button class="button">
+									Sign
+									In
+								</button>
+								<div class="dropdown-content">
+									<a id="top" href="@Url.Action("Login", "Customer")">Khách hàng</a>
+									<a id="middle" href="@Url.Action("Login", "Employee")">Nhân viên</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</nav>
+			</div>
+		}
+		<div class="container-fluid" style="margin-left: 14px; width: 98%;">
+			<nav class="navbar navbar-expand-lg bg-body-tertiary">
+				<nav class="navbar bg-body-tertiary">
+					<div class="container-fluid">
+						<a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+							<img src="~/image/Logo_NIKE.svg.png" alt="Hi" width=90px height=15px
+								 style="padding-left: 40px;">
+						</a>
+					</div>
+				</nav>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				@if (HttpContextAccessor.HttpContext.Session.GetString("EmployeeID") != null) 
+				{
+					<div class="collapse navbar-collapse text-center" id="navbarSupportedContent" style="font-weight: 600; font-size:18px;">
+						<ul class="navbar-nav me-auto mb-2 mb-lg-0 mx-auto">
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" asp-area="" asp-controller="Home" asp-action="ListProduct">Sản phẩm</a>
+							</li>
+						</ul>
+						<form class="d-flex" role="search" method="get" action="@Url.Action("Search", "Home")">
+							<div class="src-box">
+								<input type="text" placeholder="@ViewBag.Name Search " Search"" id="search-input" name="name" value="@ViewBag.Name">
+								<button type="submit"></button>
+							</div>
+						</form>
+					</div>
+				}
+				else
+				{
+					<div class="collapse navbar-collapse text-center" id="navbarSupportedContent" style="font-weight: 600; font-size:18px;">
+						<ul class="navbar-nav me-auto mb-2 mb-lg-0 mx-auto">
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" asp-area="" asp-controller="Customer" asp-action="GetAllCustomer">Đơn hàng</a>
+							</li>
+							<li class="nav-item">
+								<a class="nav-link active" aria-current="page" asp-area="" asp-controller="Home" asp-action="ListProduct">Sản phẩm</a>
+							</li>
+						</ul>
+						<form class="d-flex" role="search" method="get" action="@Url.Action("Search", "Home")">
+							<div class="src-box">
+								<input type="text" placeholder="@ViewBag.Name Search " Search"" id="search-input" name="name" value="@ViewBag.Name">
+								<button type="submit"></button>
+							</div>
+							<div class="buttonok" style="margin-right: 10px;">
+								<a class="bag" asp-controller="Cart" asp-action="Cart">
+									<i class="fa badge fa-lg" id="cartIcon" style="color: black; font-size: 35px; padding-top: 15px;">&#xf290;</i>
+								</a>
+							</div>
+							<script>
+								function updateCartItemCount() {
+									$.get('@Url.Action("GetCartItemCount", "Cart")', function (data) {
+										var cartIcon = document.getElementById('cartIcon');
+										var itemCount = data.itemCount;
+
+										if (itemCount === 0) {
+											// Ẩn số khi là 0
+											cartIcon.setAttribute('value', '');
+										} else {
+											// Hiển thị số khi lớn hơn 0
+											cartIcon.setAttribute('value', data.itemCount);
+										}
+									});
+								}
+								window.addEventListener('load', function () {
+									updateCartItemCount();
+								});
+							</script>
+						</form>
+					</div>
+				}
+			</nav>
+		</div>
+		<script>
+			// Thêm sự kiện khi trang tải xong
+			document.addEventListener("DOMContentLoaded", function () {
+				// Lấy menu cần ẩn
+				var topNavbar = document.querySelector(".select-none.bg-grey.lg\\:flex.lg\\:items-stretch.w-full");
+
+				// Lấy nút toggle
+				var toggleButton = document.querySelector(".navbar-toggler");
+
+				// Thêm sự kiện click cho nút toggle
+				toggleButton.addEventListener("click", function () {
+					// Ẩn/hiện menu cần ẩn bằng cách thêm/xóa lớp 'show'
+					topNavbar.classList.toggle('show');
+				});
+			});
+		</script>
+	</header>
+	<div class="container-fluid">
+		<main role="main" class="pb-3">
+			@RenderBody()
+		</main>
+	</div>
+	<footer class="bg-dark text-center text-white" style="margin-top:440px;">
+		<!-- Grid container -->
+		<div class="container p-4">
+			<!-- Section: Social media -->
+			<section class="mb-4">
+				<!-- Facebook -->
+				<a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-facebook-f"></i></a>
+
+				<!-- Twitter -->
+				<a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-twitter"></i></a>
+
+				<!-- Google -->
+				<a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-google"></i></a>
+
+				<!-- Instagram -->
+				<a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-instagram"></i></a>
+
+				<!-- Linkedin -->
+				<a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-linkedin-in"></i></a>
+
+				<!-- Github -->
+				<a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"><i class="fab fa-github"></i></a>
+			</section>
+			<!-- Section: Social media -->
+			<!-- Section: Form -->
+			<section class="">
+				<form action="">
+					<!--Grid row-->
+					<!--Grid row-->
+				</form>
+			</section>
+			<!-- Section: Form -->
+			<!-- Section: Text -->
+			<section class="mb-4">
+				<p>
+					Với triết lý đào tạo “Thực học – Thực nghiệp”, Cao đẳng FPT Polytechnic hướng tới đào tạo nguồn nhân lực chất
+					lượng cao với phương pháp giảng dạy qua dự án thật.
+				</p>
+			</section>
+			<!-- Section: Text -->
+			<!-- Section: Links -->
+			<section class="">
+				<!--Grid row-->
+				<div class="row">
+					<!--Grid column-->
+					<div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+						<h5 class="text-uppercase">FIND A STORE</h5>
+
+						<ul class="list-unstyled mb-0">
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">BECOME A MEMBER</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">SIGN UP FOR EMAIL</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">SEND US FEEDBACK</a>
+							</li>
+						</ul>
+					</div>
+					<!--Grid column-->
+					<!--Grid column-->
+					<div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+						<h5 class="text-uppercase">GET HELP</h5>
+
+						<ul class="list-unstyled mb-0">
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Order Status</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Delivery</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Returns</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Payment Options</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Contact Us</a>
+							</li>
+						</ul>
+					</div>
+					<!--Grid column-->
+					<!--Grid column-->
+					<div class="col-lg-4 col-md-6 mb-4 mb-md-0">
+						<h5 class="text-uppercase">ABOUT NIKE</h5>
+
+						<ul class="list-unstyled mb-0">
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">News</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Careers</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Investors</a>
+							</li>
+							<li>
+								<a href="#!" class="text-white" style="text-decoration: none; font-size: 10px;">Sustainability</a>
+							</li>
+						</ul>
+					</div>
+					<!--Grid column-->
+				</div>
+				<!--Grid row-->
+			</section>
+			<!-- Section: Links -->
+		</div>
+		<!-- Grid container -->
+		<!-- Copyright -->
+		<div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+			© 2022 Nike, Inc. All Rights Reserved - PH24890
+		</div>
+		<!-- Copyright -->
+	</footer>
+	<!-- Footer -->
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+	<script src="~/js/index.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+</body>
+</html>

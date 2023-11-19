@@ -1,0 +1,888 @@
+﻿@*@model List<CartItemViewModel>*@
+@model ShoppingCartViewModel
+@{
+	ViewData["Title"] = "Giỏ hàng";
+	// Tính toán tổng giá tiền
+	decimal totalPrice = 0;
+	var totalWeight = 0;
+	foreach (var item in Model.CartItems)
+	{
+		totalPrice += item.Price * item.Quantity;
+	}
+	var shippingFee = 0;
+	var selectedShippingMethodID = 0;
+}
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Your Page Title</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+	<style>
+		#apply-voucher-btn {
+			background-color: #4CAF50; /* Green background color */
+			color: white; /* White text color */
+			border: none; /* Remove borders */
+			padding: 10px 20px; /* Add padding */
+			text-align: center; /* Center text */
+			text-decoration: none; /* Remove underline */
+			display: inline-block;
+			margin: 4px 2px; /* Add some margin */
+			cursor: pointer; /* Add a pointer cursor on hover */
+			border-radius: 4px; /* Rounded corners */
+			font-weight: 200;
+			font-size: 12px;
+		}
+
+			#apply-voucher-btn:hover {
+				background-color: #45a049; /* Darker green color on hover */
+			}
+
+		.btn-container {
+			display: flex;
+		}
+
+		.btn-address {
+			--color: black;
+			font-family: inherit;
+			display: inline-block;
+			width: 6em;
+			height: 2.6em;
+			line-height: 2.5em;
+			overflow: hidden;
+			margin-left: 2%;
+			margin-top: 2%;
+			margin-bottom: 2%;
+			font-size: 15px;
+			z-index: 1;
+			color: var(--color);
+			border: 2px solid var(--color);
+			border-radius: 6px;
+			position: relative;
+		}
+
+			.btn-address::before {
+				position: absolute;
+				content: "";
+				background: var(--color);
+				width: 150px;
+				height: 200px;
+				z-index: -1;
+				border-radius: 50%;
+			}
+
+			.btn-address:hover {
+				color: white;
+			}
+
+			.btn-address:before {
+				top: 100%;
+				left: 100%;
+				transition: .3s all;
+			}
+
+			.btn-address:hover::before {
+				top: -30px;
+				left: -30px;
+			}
+
+		.cbx {
+			position: relative;
+			top: 1px;
+			width: 27px;
+			height: 27px;
+			border: 1px solid #c8ccd4;
+			border-radius: 3px;
+			vertical-align: middle;
+			transition: background 0.1s ease;
+			cursor: pointer;
+			display: block;
+		}
+
+			.cbx:after {
+				content: '';
+				position: absolute;
+				top: 2px;
+				left: 8px;
+				width: 7px;
+				height: 14px;
+				opacity: 0;
+				transform: rotate(45deg) scale(0);
+				border-right: 2px solid #fff;
+				border-bottom: 2px solid #fff;
+				transition: all 0.3s ease;
+				transition-delay: 0.15s;
+			}
+
+		.lbl {
+			margin-left: 5px;
+			vertical-align: middle;
+			cursor: pointer;
+		}
+
+		#cbx:checked ~ .cbx {
+			border-color: transparent;
+			background: #6871f1;
+			animation: jelly 0.6s ease;
+		}
+
+			#cbx:checked ~ .cbx:after {
+				opacity: 1;
+				transform: rotate(45deg) scale(1);
+			}
+
+		.cntr {
+			position: relative;
+		}
+
+		.hidden-xs-up {
+			display: none !important;
+		}
+	</style>
+</head>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="~/css/giohang.css">
+<section class="h-100 gradient-custom">
+	<div class="container py-5">
+		<div class="row d-flex justify-content-center my-4">
+			<div class="col-md-8">
+				<div class="card mb-4" style="border: 1px solid white;">
+					<div class="card-header py-3">
+						<h5 class="mb-0">Cart</h5>
+					</div>
+					@if (!Model.CartItems.Any())
+					{
+						<h6 style="margin-top:10px; margin-left:15px;">There are no items in your cart.</h6>
+					}
+					else
+					{
+						<div class="card-body">
+							<!-- Single item -->
+							<div class="row">
+								@foreach (var item in Model.CartItems)
+								{
+									var defaultWeight = 500; // Khối lượng mặc định cho mỗi sản phẩm
+									var productWeight = defaultWeight * item.Quantity; // Khối lượng của sản phẩm
+									totalWeight += productWeight;
+									<div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+										<!-- Image -->
+										<div class="bg-image hover-overlay hover-zoom ripple rounded" data-mdb-ripple-color="light">
+											<img src="@Url.Content("~/image/" + item.ProductImage)" class="w-100" alt="Blue Jeans Jacket" />
+											<a href="#!">
+												<div class="mask" style="background-color: rgba(251, 251, 251, 0.2)"></div>
+											</a>
+										</div>
+										<!-- Image -->
+									</div>
+									<div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+										<!-- Data -->
+										<p><strong>@item.ProductName</strong></p>
+										<p>@item.Description</p>
+										<p>Size @item.Size</p>
+										<form id="removeCartItemForm_@item.ShoesDetailsID@item.Size" method="post" action="@Url.Action("RemoveCartItem", "Cart")">
+											<input type="hidden" name="id" value="@item.ShoesDetailsID" />
+											<input type="hidden" name="sizeName" value="@item.Size" />
+										</form>
+										<!-- Button to remove cart item -->
+										<button type="button" class="btn btn-primary btn-sm me-1 mb-2" data-mdb-toggle="tooltip"
+										title="Xóa sản phẩm"
+										onclick="document.getElementById('removeCartItemForm_@item.ShoesDetailsID@item.Size').submit();">
+											<i class="fas fa-trash"></i>
+										</button>
+
+									</div>
+									<div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+										<!-- Quantity -->
+										<div class="d-flex mb-4" style="max-width: 300px;">
+											<div class="form-outline" style="margin-left: 72px;">
+												<input id="quantity_@item.ShoesDetailsID@item.Size" min="1" max="10" name="quantity" value="@item.Quantity" type="number" class="form-control quantity-input" data-shoesdetailsid="@item.ShoesDetailsID" data-price="@item.Price" data-size="@item.Size" />
+											</div>
+										</div>
+
+										<!-- Total Price -->
+										<p class="text-start text-md-center">
+											@{
+												var priceItems = item.Price * item.Quantity;
+												<span class="total-price ms-auto total-price-span" data-shoesdetailsid="@item.ShoesDetailsID" data-size="@item.Size">@priceItems.ToString("N0")đ</span>
+											}
+										</p>
+										<script>
+											window.addEventListener('load', function () {
+												// Lấy danh sách tất cả các input
+												const quantityInputs = document.querySelectorAll('.quantity-input');
+
+												// Khởi tạo tổng tiền của cả giỏ hàng
+												let totalPrice = 0;
+
+												// Lặp qua từng input
+												quantityInputs.forEach(input => {
+													const shoesDetailsId = input.getAttribute('data-shoesdetailsid');
+													const size = input.getAttribute('data-size');
+
+													// Lắng nghe sự kiện thay đổi cho từng input
+													input.addEventListener('change', function () {
+														const price = parseFloat(input.getAttribute('data-price'));
+														const quantity = parseInt(input.value);
+
+														// Cập nhật giá tiền tương ứng
+														const total = price * quantity;
+														const totalElement = document.querySelector(`.total-price-span[data-shoesdetailsid="${shoesDetailsId}"][data-size="${size}"]`);
+														totalElement.textContent = total.toLocaleString() + "đ";
+
+														// Cập nhật tổng tiền
+														totalPrice = 0; // Đặt tổng tiền về 0 trước khi tính toán lại
+														quantityInputs.forEach(input => {
+															const price = parseFloat(input.getAttribute('data-price'));
+															const quantity = parseInt(input.value);
+															totalPrice += price * quantity;
+														});
+
+														// Cập nhật tổng tiền cả giỏ hàng
+														const totalPriceElement = document.getElementById('totalPrice');
+														totalPriceElement.textContent = totalPrice.toLocaleString() + "đ";
+
+														// Gửi yêu cầu AJAX để cập nhật số lượng trên máy chủ
+														updateCartItemQuantity(shoesDetailsId, quantity, size);
+													});
+												});
+											});
+
+											function updateCartItemQuantity(shoesDetailsId, quantity, size) {
+												$.ajax({
+													url: '@Url.Action("UpdateCartItemQuantity", "Cart")',
+													type: 'POST',
+													data: { shoesDetailsId: shoesDetailsId, quantity: quantity, size: size },
+													success: function (response) {
+														// Cập nhật số lượng thành công
+														updateCartItemCount();
+													},
+													error: function (xhr, textStatus, errorThrown) {
+														// Xử lý lỗi (nếu có)
+													}
+												});
+											}
+										</script>
+										<!-- Total Price -->
+									</div>
+									<hr class="my-4" />
+								}
+							</div>
+							<!-- Single item -->
+						</div>
+					}
+				</div>
+				<div id="cart-total-container" style="display:none;">
+					<span name="TongKhoiLuong" class="cart-total-weight" id="khoiLuongSum">@totalWeight</span>
+				</div>
+				<div class="row" id="shipping-address-form-container" style="display:none;">
+					<div class="col-md-12 mb-4">
+						<div class="card mb-4">
+							<div class="card-header py-3">
+								<h5 class="mb-0">Địa chỉ nhận hàng</h5>
+							</div>
+							@foreach (var item in Model.AddressList)
+							{
+								<div class="card-body" id="existingAddress">
+									<p style="font-weight:bold; font-size:17px;">@item.FullNameCus</p>
+									<p>@item.PhoneNumber</p>
+									<p>@item.Street, @item.Ward, @item.District, @item.Province</p>
+									<div class="btn-list">
+										<div class="cntr">
+											<input checked="" type="checkbox" id="cbx" class="hidden-xs-up">
+											<label for="cbx" class="cbx"></label>
+										</div>
+										<button class="btn-address" style="float:right; margin-top:-10%; margin-right:4%;">
+											Chọn địa chỉ
+										</button>
+									</div>
+								</div>
+								<hr>
+							}
+							<div class="btn-container">
+								<button class="btn-address" onclick="showExistingAddress()">
+									Chọn địa chỉ
+								</button>
+								<button class="btn-address" onclick="showNewAddressForm()">
+									Thêm mới
+								</button>
+							</div>
+							<div class="card-body" id="newAddressForm" style="display:none;">
+								<form method="post" action="@Url.Action("AddAddress", "Cart")">
+									<div class="form-floating mb-3">
+										<input type="text" class="form-control" name="nameUser" placeholder="Họ và tên" required>
+										<label for="floatingInputEmail">Họ và tên</label>
+									</div>
+									<div class="form-floating mb-3">
+										<input type="text" class="form-control" name="phoneNumber" placeholder="Số điện thoại" required>
+										<label for="floatingInputEmail">Số điện thoại</label>
+									</div>
+									<div class="row mb-4">
+										<div class="col">
+											<div class="form-floating mb-3">
+												<select class="form-control" id="ListTinh" onchange="updateProvinceValue(this); fetchDistricts(this.value)">
+													<option value="" disabled selected>Chọn tỉnh / thành</option>
+												</select>
+												<label for="floatingInputEmail">Tỉnh/Thành Phố</label>
+											</div>
+											<input type="hidden" id="ProvinceName" name="provinceName" />
+										</div>
+										<div class="col">
+											<div class="form-floating mb-3">
+												<select class="form-control" id="ListQuanHuyen" onchange="updateDistrictValue(this); updateDistrictAndFetchWards()">
+													<option value="" disabled selected>Chọn quận / huyện</option>
+												</select>
+												<label for="floatingInputEmail">Quận/Huyện</label>
+											</div>
+											<input type="hidden" id="DistrictName" name="districtName" />
+										</div>
+										<div class="col">
+											<div class="form-floating mb-3">
+												<select class="form-control" id="ListPhuongXa" onchange="updateWardValue(this); calculateShippingFee(this.value, document.getElementById('ListQuanHuyen').value)">
+													<option value="" disabled selected>Chọn xã / phường</option>
+												</select>
+												<label for="floatingInputEmail">Xã/Phường</label>
+											</div>
+											<input type="hidden" id="WardName" name="wardName" />
+										</div>
+									</div>
+									<div class="form-floating mb-3">
+										<input type="text" class="form-control" name="street" placeholder="Địa chỉ" required>
+										<label for="floatingInputEmail">Địa chỉ cụ thể (Số nhà, đường):</label>
+									</div>
+									<button class="btn-address" type="submit" style="margin-left: 0.5%;">
+										Thêm
+									</button>
+									<div style="padding-right: 300px; display:none;" id="shippingOptionsDiv">
+										<label class="radio-button" style="font-size: 14px; display: inline;">
+											<input type="radio" name="example-radio" value="option1">
+											<span class="radio"></span>
+										</label>
+
+										<label class="radio-button" style="font-size: 14px; display:none;">
+											<input type="radio" name="example-radio" value="option2">
+											<span class="radio"></span>
+										</label>
+									</div>
+									<div>
+										<img id="imageShipper" src="~/image/icons8-delivery-25.png" style="padding-left: 10px; display:none;" />
+										<label id="deliveryDateLabel1"></label>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+				<script>
+					function showExistingAddress() {
+						document.getElementById('existingAddress').style.display = 'block';
+						document.getElementById('newAddressForm').style.display = 'none';
+					}
+					function showNewAddressForm() {
+						document.getElementById('existingAddress').style.display = 'none';
+						document.getElementById('newAddressForm').style.display = 'block';
+					}
+				</script>
+				<div class="card mb-4 mb-lg-0" style="border: 1px solid white;">
+					<div class="card-body">
+						<p><strong>We accept</strong></p>
+						<img class="me-2" style="width: 45px;"
+							 src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/visa.svg"
+							 alt="Visa" />
+						<img class="me-2" style="width: 45px;"
+							 src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/amex.svg"
+							 alt="American Express" />
+						<img class="me-2" style="width: 45px;"
+							 src="https://mdbcdn.b-cdn.net/wp-content/plugins/woocommerce-gateway-stripe/assets/images/mastercard.svg"
+							 alt="Mastercard" />
+					</div>
+				</div>
+			</div>
+			<script>
+				// Sử dụng sự kiện change để theo dõi sự thay đổi trong selection chọn xã
+				const phuongXaSelect = document.getElementById('ListPhuongXa');
+				phuongXaSelect.addEventListener('change', function () {
+					// Kiểm tra xem xã đã được chọn hay chưa
+					const selectedXa = phuongXaSelect.value;
+					const shippingOptionsDiv = document.getElementById('shippingOptionsDiv');
+					const imageShip = document.getElementById('imageShipper');
+
+					if (selectedXa) {
+						// Nếu đã chọn xã, hiển thị radio button
+						shippingOptionsDiv.style.display = 'block';
+						imageShip.style.display = 'inline-block';
+					} else {
+						// Nếu xã chưa được chọn, ẩn radio button
+						shippingOptionsDiv.style.display = 'none';
+						imageShip.style.display = 'none';
+					}
+				});
+			</script>
+			<script>
+				function updateDistrictAndFetchWards() {
+					const selectedDistrict = document.getElementById('ListQuanHuyen').value;
+					fetchWards(selectedDistrict);
+					calculateShippingFee(document.getElementById('ListPhuongXa').value, selectedDistrict);
+				}
+			</script>
+			<script>
+				// Function to fetch province data from API and populate the select element
+				function fetchProvinces() {
+					// API endpoint URL
+					const apiUrl = "https://online-gateway.ghn.vn/shiip/public-api/master-data/province";
+					// Token
+					const token = "6092d580-fde7-11ed-a967-deea53ba3605";
+					// Create headers for the request
+					const headers = {
+						"Content-Type": "application/json",
+						token: token
+					};
+					// Send GET request to the API
+					fetch(apiUrl, {
+						method: "GET",
+						headers: headers
+					})
+						.then(response => response.json())
+						.then(data => {
+							// Process the response data
+							if (data && data.data) {
+								const provinces = data.data;
+
+								// Get the select element
+								const selectElement = document.getElementById("ListTinh");
+
+								// Create and append option elements for each province
+								provinces.forEach(province => {
+									const option = document.createElement("option");
+									option.value = province.ProvinceID;
+									option.textContent = province.ProvinceName;
+									selectElement.appendChild(option);
+								});
+							}
+						})
+						.catch(error => {
+							console.error("Error fetching provinces:", error);
+						});
+				}
+				// Update hidden input value when a province is selected
+				function updateProvinceValue(selectElement) {
+					const provinceName = selectElement.options[selectElement.selectedIndex].text;
+					document.getElementById("ProvinceName").value = provinceName;
+				}
+				// Call the fetchProvinces function to populate the select box
+				fetchProvinces();
+			</script>
+			<script>
+				function fetchDistricts(province_id) {
+					const url = `https://online-gateway.ghn.vn/shiip/public-api/master-data/district?province_id=${province_id}`;
+					const token = '6092d580-fde7-11ed-a967-deea53ba3605';
+
+					fetch(url, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': token
+						}
+					})
+						.then(response => response.json())
+						.then(data => {
+							const districtSelect = document.getElementById('ListQuanHuyen');
+
+							// Add districts to the dropdown list
+							data.data.forEach(district => {
+								const option = document.createElement('option');
+								option.value = district.DistrictID;
+								option.textContent = district.DistrictName;
+								districtSelect.appendChild(option);
+							});
+						})
+						.catch(error => console.log(error));
+				}
+				// Update hidden input value when a province is selected
+				function updateDistrictValue(selectElement) {
+					const districtName = selectElement.options[selectElement.selectedIndex].text;
+					document.getElementById("DistrictName").value = districtName;
+				}
+				fetchDistricts();
+			</script>
+			<script>
+				function fetchWards(district_id) {
+					const url = `https://online-gateway.ghn.vn/shiip/public-api/master-data/ward?district_id=${district_id}`;
+					const token = '6092d580-fde7-11ed-a967-deea53ba3605';
+
+					fetch(url, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': token
+						}
+					})
+						.then(response => response.json())
+						.then(data => {
+							const wardSelect = document.getElementById('ListPhuongXa');
+
+							// Add wards to the dropdown list
+							data.data.forEach(ward => {
+								const option = document.createElement('option');
+								option.value = ward.WardCode;
+								option.textContent = ward.WardName;
+								wardSelect.appendChild(option);
+							});
+						})
+						.catch(error => console.log(error));
+				}
+				// Update hidden input value when a province is selected
+				function updateWardValue(selectElement) {
+					const wardName = selectElement.options[selectElement.selectedIndex].text;
+					document.getElementById("WardName").value = wardName;
+				}
+			</script>
+			<script>
+				// Hàm để cập nhật hình thức vận chuyển và thời gian dự kiến
+				function updateShippingOptions() {
+					var toDistrict = document.getElementById('ListQuanHuyen').value;
+					// Gọi API để cập nhật hình thức vận chuyển
+					fetch(`https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/available-services?shop_id=4185066&from_district=3440&to_district=${toDistrict}`, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': '6092d580-fde7-11ed-a967-deea53ba3605'
+						}
+					})
+						.then(response => response.json())
+						.then(data => {
+							var shippingMethods = data.data;
+							var shippingOptionsDiv = document.getElementById('shippingOptionsDiv');
+
+							// Cập nhật hình thức vận chuyển
+							var firstLabel = shippingOptionsDiv.querySelector('.radio-button:nth-child(1)');
+							firstLabel.innerHTML = 'Hình thức vận chuyển: ' + shippingMethods[0].short_name;
+							firstLabel.style.fontSize = '16px';
+							firstLabel.style.fontWeight = 'bold';
+							selectedShippingMethodID = shippingMethods[0].service_id;
+							console.log(selectedShippingMethodID);
+							// Ẩn dòng thứ hai
+							var secondLabel = shippingOptionsDiv.querySelector('.radio-button:nth-child(2)');
+							secondLabel.style.display = 'none';
+
+							// Hiển thị "shippingOptionsDiv" sau khi có dữ liệu
+							shippingOptionsDiv.style.display = 'block';
+
+							// Gọi hàm tính toán ngày nhận hàng dự kiến
+							calculateDeliveryDate();
+						})
+						.catch(error => {
+							console.error('Error:', error);
+						});
+				}
+				// Sự kiện khi có sự thay đổi ở các textbox chọn địa chỉ hoặc khi trang web được tải lần đầu
+				document.getElementById('ListQuanHuyen').addEventListener('change', updateShippingOptions);
+				document.getElementById('ListPhuongXa').addEventListener('change', updateShippingOptions);
+
+				// Hàm tính toán ngày nhận hàng dự kiến
+				function calculateDeliveryDate() {
+					// Gọi hàm getLeadTime() để lấy thời gian dự kiến nhận hàng
+					getLeadTime().then(leadTime => {
+						if (leadTime !== null) {
+							// Thời điểm Epoch (ngày 1 tháng 1 năm 1970) theo múi giờ UTC
+							var epochTimeUTC = new Date("1970-01-01T00:00:00Z");
+
+							// Chuyển leadTime thành mili giây và thêm vào thời điểm Epoch theo múi giờ UTC
+							var deliveryDateUTC = new Date(epochTimeUTC.getTime() + (leadTime * 1000));
+
+							// Điều chỉnh thời gian dự kiến nhận hàng sang múi giờ Việt Nam (UTC+7)
+							var deliveryDateVietnam = new Date(deliveryDateUTC.getTime() + (7 * 60 * 60 * 1000));
+
+							// Trích xuất ngày, tháng và năm từ thời gian dự kiến
+							var day = deliveryDateVietnam.getDate();
+							var month = deliveryDateVietnam.getMonth() + 1; // Tháng trong JavaScript bắt đầu từ 0, cần cộng thêm 1.
+							var year = deliveryDateVietnam.getFullYear();
+
+							// Tạo chuỗi định dạng "dd-mm-yyyy"
+							var formattedDate = day + '-' + (month < 10 ? '0' : '') + month + '-' + year;
+
+							var deliveryDateLabel = document.getElementById('deliveryDateLabel1');
+							deliveryDateLabel.innerHTML = 'Ngày nhận hàng dự kiến: ' + formattedDate;
+							deliveryDateLabel.style.paddingLeft = '10px';
+							deliveryDateLabel.style.paddingTop = '10px';
+							deliveryDateLabel.style.fontWeight = 'bold';
+						}
+					});
+				}
+
+				// Hàm để lấy thời gian dự kiến nhận hàng
+				function getLeadTime() {
+					var toDistrictId = document.getElementById('ListQuanHuyen').value;
+					console.log(toDistrictId);
+					var toWardCode = document.getElementById('ListPhuongXa').value;
+					console.log(toWardCode);
+					return fetch(`https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime?from_district_id=3440&from_ward_code=13010&to_district_id=${toDistrictId}&to_ward_code=${toWardCode}&service_id=${selectedShippingMethodID}`, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': '6092d580-fde7-11ed-a967-deea53ba3605',
+							'shop_id': '4185066'
+						}
+					})
+						.then(response => response.json())
+						.then(data => {
+							console.log(data.data.leadtime);
+							return data.data.leadtime;
+						})
+						.catch(error => {
+							console.error('Error:', error);
+							return null;
+						});
+				}
+			</script>
+			<script>
+				function calculateShippingFee(to_ward_code, to_district_id) {
+					var totalPriceElement = document.getElementById('totalPrice');
+					var totalPriceText = totalPriceElement.innerText;
+					var totalPrice = parseInt(totalPriceText.replace(/[^\d]/g, ''));
+
+					var totalWeight = document.getElementById('khoiLuongSum');
+					var totalWeightText = totalWeight.innerText;
+					var totalWeightSum = parseInt(totalWeightText.replace(/[^\d]/g, ''));
+					const url = `https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee?service_id=${selectedShippingMethodID}&insurance_value=${totalPrice}&coupon&to_ward_code=${to_ward_code}&to_district_id=${to_district_id}&from_district_id=3440&weight=${totalWeightSum}&length=38&width=15&height=15`;
+					const token = '6092d580-fde7-11ed-a967-deea53ba3605';
+					const shop_id = '4185066';
+
+					fetch(url, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							'token': token,
+							'shop_id': shop_id
+						}
+					})
+						.then(response => response.json())
+						.then(data => {
+							console.log(data);
+							const wardSelect = document.getElementById('phivanchuyen');
+							wardSelect.innerHTML = data.data.total.toLocaleString('vi-VN') + "đ";
+							// giá trị cho input
+							var shippingFee = data.data.total;
+							document.getElementById('shippingFee').value = shippingFee;
+							//
+							var totalOk = totalPrice + shippingFee;
+							var tongTienElement = document.querySelector('[name="TongTien"]');
+							tongTienElement.innerText = totalOk.toLocaleString('vi-VN') + "đ";
+						})
+						.catch(error => console.log(error));
+				}
+			</script>
+			<div class="col-md-4">
+				<div class="card mb-4" style="border: 1px solid white;">
+					<div class="card-header py-3">
+						<h5 class="mb-0">Summary</h5>
+					</div>
+					<div class="card-body" style="border: 1px solid white;">
+						<div id="total-price">
+							<ul class="list-group list-group-flush">
+								<li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+									Tổng giá sản phẩm
+									<div id="cart-total-container">
+										<span class="cart-total-sub" id="totalPrice">@totalPrice.ToString("N0")đ</span>
+									</div>
+								</li>
+								<li class="list-group-item d-flex justify-content-between align-items-center px-0">
+									Chọn voucher:
+									<select id="voucher-select">
+										@foreach (var voucher in Model.Vouchers)
+										{
+											<option value="@voucher.VoucherCode">@voucher.VoucherCode - @voucher.VoucherValue đ</option>
+										}
+									</select>
+									<button id="apply-voucher-btn">Áp dụng</button>
+								</li>
+
+
+								<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+								<script>
+									$(document).ready(function () {
+										$("#apply-voucher-btn").click(function () {
+											// Lấy giá trị được chọn từ dropdown
+											var selectedVoucherCode = $("#voucher-select").val();
+
+											// Gửi yêu cầu đến server để xử lý áp dụng voucher
+											$.ajax({
+												type: "GET",
+												url: "https://localhost:7036/api/Voucher/find-voucher", // Thay thế đường dẫn và tên controller phù hợp
+												data: { code: selectedVoucherCode },
+												success: function (result) {
+													console.log(@totalPrice);
+													var total = (@totalPrice - result[0].voucherValue);
+													document.getElementById('total-price-payment').innerText = total;
+													console.log(total);
+												},
+												error: function (error) {
+													console.log("Error:", error);
+												}
+											});
+										});
+									});
+								</script>
+
+								<li class="list-group-item d-flex justify-content-between align-items-center px-0">
+									Phí vận chuyển
+									<span id="phivanchuyen">@Html.Raw(shippingFee)</span>
+								</li>
+								<li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+									<div>
+										<strong>Tổng</strong>
+									</div>
+									<div id="cart-total-container">
+										<span name="TongTien" id="total-price-payment" class="cart-total-all" style="font-weight:bold;"></span>
+									</div>
+								</li>
+							</ul>
+							<hr style="margin-top: 104px;" />
+							<h5>Thông Tin Thanh Toán</h5>
+							<form method="post" action="@Url.Action("CheckoutOk", "Cart")" id="checkout-form" style="margin-top:15px;">
+								<input type="number" id="shippingFee" name="shippingFee" value="" style="display:none;">
+								<div class="form-group">
+									<input type="hidden" id="total-price" name="TongTien" value="">
+								</div>
+								<div class="form-group">
+									<input type="radio" id="paid" name="HinhThucThanhToan" value="Tại Quầy" checked>
+									<label for="paid">Mua hàng tại quầy</label>
+									<br />
+									<input type="radio" id="not-paid1" name="HinhThucThanhToan" value="Giao Hàng">
+									<label for="not-paid">Giao hàng</label>
+								</div>
+								<button class="btn1 btn-danger text mr-2 px-4" type="submit"
+										style="width: 355px; height: 45px; border-radius: 25px; color: white; background-color: black; margin-top:15px;">
+									Xác Nhận Đặt Hàng
+								</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<script>
+				$(document).ready(function () {
+					// Lắng nghe sự kiện khi radio button thay đổi
+					$('input[name="HinhThucThanhToan"]').change(function () {
+						var shippingFormContainer = document.getElementById('shipping-address-form-container');
+						if (this.value === 'Giao Hàng') {
+							// Hiển thị form "Địa chỉ nhận hàng"
+							shippingFormContainer.style.display = 'block';
+						} else {
+							// Ẩn form "Địa chỉ nhận hàng"
+							shippingFormContainer.style.display = 'none';
+						}
+					});
+				});
+			</script>
+		</div>
+	</div>
+</section>
+<div class="shell">
+	<div class="container">
+		<div class="tieude1" style="padding-bottom: 8px;">
+			<h3>Có thể bạn quan tâm</h3>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<div class="wsk-cp-product">
+					<div class="wsk-cp-img">
+						<img src="/image/anh26.png" alt="Product" class="img-responsive" />
+					</div>
+					<div class="wsk-cp-text">
+						<div class="category">
+							<span>View</span>
+						</div>
+						<div class="title-product">
+							<h3>Nike ZoomX Vaporfly</h3>
+						</div>
+						<div class="description-prod">
+							<p>Men's Road Racing Shoesk NEXT% 2</p>
+						</div>
+						<div class="card-footer" style="padding-left: 38px;">
+							<div class="wcf-left">
+								<span class="price" style="color: red; font-size: 16px;">
+									5,617,649đ <del style="color: black; font-size: 16px;"> 6.408.000đ</del>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="wsk-cp-product">
+					<div class="wsk-cp-img">
+						<img src="/image/anh27.png" alt="Product" class="img-responsive" />
+					</div>
+					<div class="wsk-cp-text">
+						<div class="category">
+							<span>View</span>
+						</div>
+						<div class="title-product">
+							<h3>Nike Pegasus Trail 3</h3>
+						</div>
+						<div class="description-prod">
+							<p>Men's Trail-Running Shoes</p>
+						</div>
+						<div class="card-footer" style="padding-left: 38px;">
+							<div class="wcf-left">
+								<span class="price" style="color: red; font-size: 16px;">
+									3,829,000đ <del style="color: black; font-size: 16px;"> 4.205.000đ</del>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="wsk-cp-product">
+					<div class="wsk-cp-img">
+						<img src="/image/anh28.png" alt="Product" class="img-responsive" />
+					</div>
+					<div class="wsk-cp-text">
+						<div class="category">
+							<span>View</span>
+						</div>
+						<div class="title-product">
+							<h3>Nike Heritage</h3>
+						</div>
+						<div class="description-prod">
+							<p>Drawstring Bag (13L)</p>
+						</div>
+						<div class="card-footer" style="padding-left: 50px;">
+							<div class="wcf-left">
+								<span class="price" style="color: red; font-size: 16px;">
+									509,000đ <del style="color: black; font-size: 16px;"> 699.000đ</del>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="wsk-cp-product">
+					<div class="wsk-cp-img">
+						<img src="/image/anh29.png" alt="Product" class="img-responsive" />
+					</div>
+					<div class="wsk-cp-text">
+						<div class="category">
+							<span>View</span>
+						</div>
+						<div class="title-product">
+							<h3>Nike React Infinity Run</h3>
+						</div>
+						<div class="description-prod">
+							<p>Men's Road Running Shoes</p>
+						</div>
+						<div class="card-footer" style="padding-left: 38px;">
+							<div class="wcf-left">
+								<span class="price" style="color: red; font-size: 16px;">
+									3,747,649đ <del style="color: black; font-size: 16px;"> 4.409.000đ</del>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
